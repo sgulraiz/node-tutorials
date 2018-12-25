@@ -13,6 +13,13 @@ app.get('/api/courses', (req, res) => {
     res.send([1, 2, 3]);
 })
 //app object also comes with a web server that we can configure to listen a specific port
-app.listen(3000, () => console.log('Listening on port 3000...'));
+//this is hardcoded port - in real world we need to use environment variable to use the port dynamilcally assigned by the hosting provider
+//app.listen(3000, () => console.log('Listening on port 3000...'));
+//When hosting this application on a hosting provider, they will assign a port or will provider environment variable
+//in this example, we will set an environment variable called PORT and will assign port 5000 - on MAC export PORT=5000
+//if the environment variable is not defined, it will use port 3000 - "|| 3000"
+const port = process.env.PORT || 3000;
+//We will have app listen on PORT - We are using back tick when defining string template below - key next to number 1 on keybord
+app.listen(port, () => console.log(`Listening on port ${port}...`));
 
 
