@@ -1,7 +1,7 @@
 {
   "name": "express-intro",
   "version": "1.0.0",
-  "description": "Sample express module",
+  "description": "This module contains an introductory sample module on express",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nodemon": "^1.18.9"
+    "express": "^4.16.4"
   }
 }
