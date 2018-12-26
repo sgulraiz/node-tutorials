@@ -2,6 +2,8 @@
 const express = require('express');
 //if we use the above mentioned function, it return an object of type express. We assign this object to a constant called app
 const app = express();
+//We need the express.json middleware to read the object from the request before using the information in a post request
+app.use(express.json());
 //app object has bunch of methods - we will use the get method
 //get method takes 2 aurgument, first method takes the path or the url
 //2nd aurgument is the call back function - ths call back function has 2 arguments - req and res
@@ -38,6 +40,21 @@ app.get('/api/courses/:id', (req, res) => {
 app.get('/api/posts/:year/:month', (req, res) => {
     res.send(req.params);
 });
+//Below is the example of a post request where the information passed into the request
+//we use the informtion and create a ccourse object and then push it to the courses array
+app.post('/api/courses', (req, res) => {
+    //define a course object and contruct it using the infromation passed on the body of the request
+    //we will read the name from the body of the request
+    //In this example since we are not using a database, we are responsible for manually creating an id
+    //we will take the length of the courses array and add 1 to it to create an id
+    var course = {
+        id: courses.length + 1,
+        name: req.body.name
+    };
+    //push the new course to the courses array
+    courses.push(course);
+    res.send(course);
+});
 //app object also comes with a web server that we can configure to listen a specific port
 //this is hardcoded port - in real world we need to use environment variable to use the port dynamilcally assigned by the hosting provider
 //app.listen(3000, () => console.log('Listening on port 3000...'));
@@ -47,5 +64,3 @@ app.get('/api/posts/:year/:month', (req, res) => {
 const port = process.env.PORT || 3000;
 //We will have app listen on PORT - We are using back tick when defining string template below - key next to number 1 on keybord
 app.listen(port, () => console.log(`Listening on port ${port}...`));
-
-
