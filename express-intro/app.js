@@ -1,9 +1,15 @@
+//load Joi module for schema validation - require(joi) retuens a class
+const Joi = require("joi");
 //load express module
 const express = require('express');
 //if we use the above mentioned function, it return an object of type express. We assign this object to a constant called app
 const app = express();
 //We need the express.json middleware to read the object from the request before using the information in a post request
 app.use(express.json());
+//Define Schema
+const schema = {
+    name: Joi.string().min(3).required()
+};
 //app object has bunch of methods - we will use the get method
 //get method takes 2 aurgument, first method takes the path or the url
 //2nd aurgument is the call back function - ths call back function has 2 arguments - req and res
@@ -47,10 +53,16 @@ app.post('/api/courses', (req, res) => {
     //we will read the name from the body of the request
     //In this example since we are not using a database, we are responsible for manually creating an id
     //we will take the length of the courses array and add 1 to it to create an id
-    var course = {
-        id: courses.length + 1,
-        name: req.body.name
-    };
+    //We will validate the name passed in the body against our defined schema 
+    var result = Joi.validate(req.body, schema);
+    if (result.error){
+        res.status(400).send(result.error.details[0].message)
+    } else {
+        var course = {
+            id: courses.length + 1,
+            name: req.body.name
+    }
+}
     //push the new course to the courses array
     courses.push(course);
     res.send(course);
