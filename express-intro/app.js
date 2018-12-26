@@ -6,10 +6,7 @@ const express = require('express');
 const app = express();
 //We need the express.json middleware to read the object from the request before using the information in a post request
 app.use(express.json());
-//Define Schema
-const schema = {
-    name: Joi.string().min(3).required()
-};
+
 //app object has bunch of methods - we will use the get method
 //get method takes 2 aurgument, first method takes the path or the url
 //2nd aurgument is the call back function - ths call back function has 2 arguments - req and res
@@ -38,6 +35,7 @@ app.get('/api/courses/:id', (req, res) => {
     var course = courses.find(c => c.id === parseInt(req.params.id));
     if (!course) {
         res.status(404).send('The course with given id was not found');
+        return;
     } else {
         res.send(course);
     }
@@ -53,10 +51,13 @@ app.post('/api/courses', (req, res) => {
     //we will read the name from the body of the request
     //In this example since we are not using a database, we are responsible for manually creating an id
     //we will take the length of the courses array and add 1 to it to create an id
-    //We will validate the name passed in the body against our defined schema 
-    var result = Joi.validate(req.body, schema);
-    if (result.error){
-        res.status(400).send(result.error.details[0].message)
+    //We will validate the name passed in the body against our defined schema by passing it to the validateCourse function 
+    //we are using object destructuring syntax. When defining variable, we use the property of the object directly
+    //error is the property of the object returned from validateCourse
+    var { error } = validateCourse(req.body); 
+    if (error){
+        res.status(400).send(error.details[0].message);
+        return;
     } else {
         var course = {
             id: courses.length + 1,
@@ -67,6 +68,51 @@ app.post('/api/courses', (req, res) => {
     courses.push(course);
     res.send(course);
 });
+//The route handler below will update a specific course
+//we will use a route parameter since we will be updating a specific course using the id
+app.put('/api/courses/:id', (req, res) => {
+    //Lookup the specific course
+    var course = courses.find(c => c.id === parseInt(req.params.id));
+    //if course is not found, send http 404 stating that record not found
+    if (!course) {
+        res.status(404).send('Course with given ID is not found');
+        return;
+    }
+    //validate the data in the body of the request
+    var { error } = validateCourse(req.body);
+    //if validation fails, send http 404 - Bad request with the validation error details
+    //if validation pass, then update the course name and return updated course
+    if (error){
+        res.status(400).send(error.details[0].message);
+        return;
+    } else {
+        course.name = req.body.name;
+        res.send(course);
+    }  
+});
+//Route to delete a course
+//we will check and see if the course exist in the array by checking the id
+app.delete('/api/courses/:id', (req, res) => {
+    var course = courses.find(c => c.id === parseInt(req.params.id));
+    if (!course) {
+        res.status(400).send('Course with given ID is not found');
+        return;
+    } else {
+        var index = courses.indexOf(course);
+        courses.splice(index, 1);
+        res.send(course);
+    }
+});
+//define function to validate schema
+//pass in the course and then validate it against schema and return the result
+function validateCourse(course) {
+    //define schema
+    const schema = {
+        name: Joi.string().min(3).required()
+    };
+    return Joi.validate(course, schema);
+}
+
 //app object also comes with a web server that we can configure to listen a specific port
 //this is hardcoded port - in real world we need to use environment variable to use the port dynamilcally assigned by the hosting provider
 //app.listen(3000, () => console.log('Listening on port 3000...'));
